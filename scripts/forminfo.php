@@ -1,10 +1,13 @@
 <?php
 
 
-// echo the entered input
-$name = $_POST['name'];
 
-echo $name;
+$name = $_POST['name'];
+$phone = $_POST['phone'];
+
+// echo the entered input
+echo $name . "<br />";
+echo $phone;
 
 
 ?>
