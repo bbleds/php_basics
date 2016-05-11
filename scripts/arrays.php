@@ -25,6 +25,30 @@ echo "<br />";
 echo "Merged array : <br />";
 $merged = array_merge($arrayTwo[0], $arrayTwo[1]);
 var_dump($merged);
+echo "<br />";
+
+
+// Split string into an array by the space character and join back into a string
+$theString = "Hello world, It's a great day!";
+//============== in multiple statements
+$splitString = explode(" ", $theString);
+echo "it has been split: <br />";
+var_dump($splitString);
+echo "<br />";
+
+// loop over each and echo out
+foreach($splitString as $value){
+  echo $value . "<br />";
+}
+
+// join split array together
+$joinedString = implode(" ", $splitString);
+echo $joinedString;
+echo "<br />";
+
+// ============== in one statement and elimate spaces
+echo "<br />";
+echo implode("", explode(" ", $theString));
 
 
 
