@@ -10,7 +10,10 @@ echo $name . "<br />";
 echo $phone . "<br />";
 
 // examine predefined variables
-echo var_dump($GLOBALS);
+// var_dump($GLOBALS);
+
+var_dump($_POST);
+
 
 // a comment
 
