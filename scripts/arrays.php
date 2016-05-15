@@ -49,22 +49,4 @@ echo "<br />";
 // ============== in one statement and elimate spaces
 echo "<br />";
 echo implode("", explode(" ", $theString));
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ?>
