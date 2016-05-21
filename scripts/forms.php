@@ -10,7 +10,6 @@
  *
  * @return void
  */
-
 function print_val($fieldName){
 	$fieldValue = "";
 
@@ -20,6 +19,25 @@ function print_val($fieldName){
 
 	print $fieldValue;
 }
+
+/**
+ * validate_comment()
+ *
+ * Validates the comment text box input to a certain length, defaults to a length of 200 characters
+ *
+ * @access public
+ * @param int $length
+ *
+ * @return bool
+ */
+function validate_comment($length=200){
+	$valid = false;
+	if(strlen($_POST['comments']) < $length){
+		$valid = true;
+	}
+	return $valid;
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -41,7 +59,7 @@ function print_val($fieldName){
 	<h1>Contact</h1>
 
 <?php
-// display error message or print valid form submission
+// Goal one: validate required fields - display error message or print valid form submission
 if(
 	isset($_POST['submitCheck']) &&
 	(!isset($_POST['firstName']) || trim($_POST['firstName']) === "" ||
@@ -51,13 +69,18 @@ if(
 	print "Please enter all required fields";
 	$isValid = false;
 } else {
-	$isValid = true;
-	foreach($_POST as $field => $value){
-		if($field == 'submitCheck'){
-			break;
-		} else {
-			print "$field: $value <br />";
+	// Extra Goal: validate comment, state, and email
+	if(validate_comment() && true && true){
+		$isValid = true;
+		foreach($_POST as $field => $value){
+			if($field == 'submitCheck'){
+				break;
+			} else {
+				print "$field: $value <br />";
+			}
 		}
+	} else {
+		print "There was a problem with the submission, please try again";
 	}
 }
 
