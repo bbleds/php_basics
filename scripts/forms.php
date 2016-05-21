@@ -59,6 +59,32 @@ function validate_state(){
 	return $checkValid;
 }
 
+/**
+ * validate_email()
+ *
+ * Validates the email text input, checking for occurences and correct order of '@' and '.' characters
+ *
+ * @access public
+ *
+ * @return bool
+ */
+function validate_email(){
+	$checkValid = false;
+
+	if(isset($_POST['email'])){
+		if(
+			strpos($_POST['email'],'.') !== false &&
+			substr_count($_POST['email'], '@') == 1 &&
+			strpos($_POST['email'],'.') > strpos($_POST['email'],'@')
+		){
+			$checkValid = true;
+		}
+	} else {
+		$checkValid = true;
+	}
+
+	return $checkValid;
+}
 ?>
 
 <!DOCTYPE html>
@@ -91,7 +117,7 @@ if(
 	$isValid = false;
 } else {
 	// Extra Goal: validate comment, state, and email
-	if(validate_comment() && validate_state() && true){
+	if(validate_comment() && validate_state() && validate_email()){
 		$isValid = true;
 		foreach($_POST as $field => $value){
 			if($field == 'submitCheck'){
@@ -100,7 +126,7 @@ if(
 				print "$field: $value <br />";
 			}
 		}
-	} elseif(isset($_POST['submitCheck'])) {
+	} else {
 		print "There was a problem with the submission, please try again";
 	}
 }
