@@ -31,11 +31,32 @@ function print_val($fieldName){
  * @return bool
  */
 function validate_comment($length=200){
-	$valid = false;
+	$checkValid = false;
 	if(strlen($_POST['comments']) < $length){
-		$valid = true;
+		$checkValid = true;
 	}
-	return $valid;
+	return $checkValid;
+}
+
+/**
+ * validate_state()
+ *
+ * Validates the state text input, if entered, to allow only a two-letter string abbreviation
+ *
+ * @access public
+ *
+ * @return bool
+ */
+function validate_state(){
+	$checkValid = false;
+	if($_POST['state'] != ""){
+			if(!preg_match('/[0-9]/',$_POST['state']) && trim(strlen($_POST['state'])) == 2){
+				$checkValid = true;
+			}
+	} else {
+		$checkValid = true;
+	}
+	return $checkValid;
 }
 
 ?>
@@ -70,7 +91,7 @@ if(
 	$isValid = false;
 } else {
 	// Extra Goal: validate comment, state, and email
-	if(validate_comment() && true && true){
+	if(validate_comment() && validate_state() && true){
 		$isValid = true;
 		foreach($_POST as $field => $value){
 			if($field == 'submitCheck'){
@@ -79,7 +100,7 @@ if(
 				print "$field: $value <br />";
 			}
 		}
-	} else {
+	} elseif(isset($_POST['submitCheck'])) {
 		print "There was a problem with the submission, please try again";
 	}
 }
