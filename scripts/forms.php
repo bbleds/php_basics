@@ -119,9 +119,12 @@ if(
 	// Extra Goal: validate comment, state, and email
 	if(validate_comment() && validate_state() && validate_email()){
 		$isValid = true;
+		$name = "";
 		foreach($_POST as $field => $value){
 			if($field == 'submitCheck'){
-				break;
+				print "name: $name";
+			} elseif($field == 'firstName' || $field == 'lastName') {
+				$name .= "$value ";
 			} else {
 				print "$field: $value <br />";
 			}
