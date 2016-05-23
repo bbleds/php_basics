@@ -56,7 +56,11 @@ function validate_state(){
 
 	if(!empty($state) && !preg_match('/[0-9]/',$state) && strlen($state) == 2){
 		$checkValid = true;
-	} 
+	}
+// the regex below is same as the if statement above
+	if(preg_match('/^[a-z]{2}$/i', $state)) {
+		$checkValid = true;
+	}
 
 	return $checkValid;
 }
@@ -73,6 +77,11 @@ function validate_state(){
 function validate_email(){
 	$checkValid = false;
 
+	if (preg_match('/^([^\@]+)\@([^@]+\.[^@]+)$/', $_POST['email'], $matches)) {
+		$account = $matches[1];
+		$domain = $matches[2];
+	}
+// regex above is same as expression below
 	if(isset($_POST['email'])){
 		
 		if(
@@ -138,7 +147,7 @@ if(isset($_POST) && !empty($_POST)){
 
 		} else {
 			$isValid = false;
-			$errorMsg .= "Email address is invalid <br />";
+			$errorMsg .= "Email address is invalid: must contain only one '@' and at least one '.' <br />";
 		}
 	}
 
