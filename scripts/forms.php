@@ -1,5 +1,4 @@
 <?php
-
 /**
  * print_val()
  *
@@ -12,14 +11,11 @@
  */
 function print_val($fieldName){
 	$fieldValue = "";
-
 	if(isset($_POST[$fieldName])){
 		$fieldValue = filter_input(INPUT_POST, $fieldName, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 	}
-
 	print $fieldValue;
 }
-
 /**
  * validate_comment()
  *
@@ -32,12 +28,11 @@ function print_val($fieldName){
  */
 function validate_comment($length=200){
 	$checkValid = false;
-	if(strlen($_POST['comments']) < $length){
+	if(isset($_POST['comments']) && strlen($_POST['comments']) < $length){
 		$checkValid = true;
 	}
 	return $checkValid;
 }
-
 /**
  * validate_state()
  *
@@ -49,7 +44,7 @@ function validate_comment($length=200){
  */
 function validate_state(){
 	$checkValid = false;
-	if($_POST['state'] != ""){
+	if(isset($_POST['state']) && $_POST['state'] != ""){
 			if(!preg_match('/[0-9]/',$_POST['state']) && trim(strlen($_POST['state'])) == 2){
 				$checkValid = true;
 			}
@@ -58,7 +53,6 @@ function validate_state(){
 	}
 	return $checkValid;
 }
-
 /**
  * validate_email()
  *
@@ -70,7 +64,6 @@ function validate_state(){
  */
 function validate_email(){
 	$checkValid = false;
-
 	if(isset($_POST['email'])){
 		if(
 			strpos($_POST['email'],'.') !== false &&
@@ -82,7 +75,6 @@ function validate_email(){
 	} else {
 		$checkValid = true;
 	}
-
 	return $checkValid;
 }
 ?>
@@ -107,6 +99,7 @@ function validate_email(){
 
 <?php
 // Goal one: validate required fields - display error message or print valid form submission
+$isValid = false;
 if(
 	isset($_POST['submitCheck']) &&
 	(!isset($_POST['firstName']) || trim($_POST['firstName']) === "" ||
@@ -114,7 +107,6 @@ if(
 	!isset($_POST['email']) || trim($_POST['email']) === "")
 ){
 	print "Please enter all required fields";
-	$isValid = false;
 } else {
 	// Extra Goal: validate comment, state, and email
 	if(validate_comment() && validate_state() && validate_email()){
@@ -129,11 +121,10 @@ if(
 				print "$field: $value <br />";
 			}
 		}
-	} else {
+	} elseif(isset($_POST['submitCheck'])) {
 		print "There was a problem with the submission, please try again";
 	}
 }
-
 // display form if form has not been submitted or is not valid
 if(!isset($_POST['submitCheck']) || $isValid == false){
 ?>
