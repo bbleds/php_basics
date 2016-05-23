@@ -2,7 +2,7 @@
 /**
  * print_val()
  *
- * Conditionally prints the value for a set input box if a form has been submitted or empty string if input box is not set
+ * Prints the filtered value for a set input box if a form has been submitted
  *
  * @access public
  * @param string $fieldName
@@ -17,40 +17,50 @@ function print_val($fieldName){
 /**
  * validate_comment()
  *
- * Validates the comment text box input to a certain length, defaults to a length of 200 characters
+ * Validates the comment input box to a certain length, defaults to a length of 200 characters
  *
  * @access public
  * @param int $length
  *
- * @return bool
+ * @return bool $checkValid
  */
 function validate_comment($length=200){
 	$checkValid = false;
+
 	if(isset($_POST['comments']) && strlen($_POST['comments']) < $length){
 		$checkValid = true;
 	}
+
 	return $checkValid;
 }
+
 /**
  * validate_state()
  *
- * Validates the state text input, if entered, to allow only a two-letter string abbreviation
+ * Validates the state input box, if entered, to allow only a two-letter string abbreviation
  *
  * @access public
  *
- * @return bool
+ * @return bool $checkValid
  */
 function validate_state(){
 	$checkValid = false;
-	if(isset($_POST['state']) && $_POST['state'] != ""){
-			if(!preg_match('/[0-9]/',$_POST['state']) && trim(strlen($_POST['state'])) == 2){
-				$checkValid = true;
-			}
-	} else {
+	$state = isset($_POST['state']) ? trim($_POST['state']) : ""; 
+
+	// if(isset($_POST['state'])) {
+	// 	$state = trim($_POST['state']);
+	// } else {
+	// 	$state = "";
+	// }
+	// EXACTLY THE SAME AS TERNARY ABOVE
+
+	if(!empty($state) && !preg_match('/[0-9]/',$state) && strlen($state) == 2){
 		$checkValid = true;
-	}
+	} 
+
 	return $checkValid;
 }
+
 /**
  * validate_email()
  *
@@ -58,21 +68,22 @@ function validate_state(){
  *
  * @access public
  *
- * @return bool
+ * @return bool $checkValid
  */
 function validate_email(){
 	$checkValid = false;
+
 	if(isset($_POST['email'])){
+		
 		if(
-			strpos($_POST['email'],'.') !== false &&
-			substr_count($_POST['email'], '@') == 1 &&
-			strpos($_POST['email'],'.') > strpos($_POST['email'],'@')
+			(strpos($_POST['email'],'.') !== false) &&
+			(substr_count($_POST['email'], '@') == 1) &&
+			(strpos($_POST['email'],'.') > strpos($_POST['email'],'@'))
 		){
 			$checkValid = true;
 		}
-	} else {
-		$checkValid = true;
-	}
+	} 
+
 	return $checkValid;
 }
 ?>
@@ -97,34 +108,55 @@ function validate_email(){
 
 <?php
 // Goal one: validate required fields - display error message or print valid form submission
-$isValid = false;
-if(
-	isset($_POST['submitCheck']) &&
-	(!isset($_POST['firstName']) || trim($_POST['firstName']) === "" ||
-	!isset($_POST['lastName']) || trim($_POST['lastName']) === "" ||
-	!isset($_POST['email']) || trim($_POST['email']) === "")
-){
-	print "Please enter all required fields";
-} else {
-	// Extra Goal: validate comment, state, and email
-	if(validate_comment() && validate_state() && validate_email()){
-		$isValid = true;
-		$name = "";
+$isValid = true;
+$errorMsg = "";
+if(isset($_POST) && !empty($_POST)){
+	$firstName = trim($_POST['firstName']);
+	$lastName = trim($_POST['lastName']);
+	$email = trim($_POST['email']);
+
+	if(
+		!isset($_POST['firstName']) || empty($firstName) ||
+		!isset($_POST['lastName']) || empty($lastName) ||
+		!isset($_POST['email']) || empty($email)
+	){
+		$isValid = false;
+		$errorMsg .= "Please enter all required fields";
+	} else {
+		// Extra Goal: validate comment, state, and email
+		if(validate_email()){
+
+			if(isset($_POST['comments']) && !empty($_POST['comments']) && !validate_comment()){
+				$errorMsg .= "Comment is invalid: comment must be under 200 characters <br />";
+				$isValid = false;
+			}
+
+			if(isset($_POST['state']) && !empty($_POST['state']) && !validate_state()){
+				$errorMsg .= "State is invalid: enter only two letter abbreviation of state <br />";
+				$isValid = false;
+			}
+
+		} else {
+			$isValid = false;
+			$errorMsg .= "Email address is invalid <br />";
+		}
+	}
+
+	if($isValid){
+		$name = strip_tags($_POST['firstName']) . " " . strip_tags($_POST['lastName']);
+		print $name;
 		foreach($_POST as $field => $value){
-			if($field == 'submitCheck'){
-				print "name: $name";
-			} elseif($field == 'firstName' || $field == 'lastName') {
-				$name .= strip_tags($value)." ";
-			} else {
+
+			if($field != 'firstName' && $field != 'lastName') {
 				print "$field: ".strip_tags($value)." <br />";
 			}
 		}
-	} elseif(isset($_POST['submitCheck'])) {
-		print "There was a problem with the submission, please try again";
+	} else {
+		print $errorMsg;
 	}
 }
-// display form if form has not been submitted or is not valid
-if(!isset($_POST['submitCheck']) || $isValid == false){
+	// display form if form has not been submitted or is not valid
+	if(empty($_POST) || $isValid === false){
 ?>
 
 		<form method="post" action="forms.php">
@@ -139,14 +171,14 @@ if(!isset($_POST['submitCheck']) || $isValid == false){
 				<li>State: <input type="text" name="state" value="<?php print_val('state') ?>"/></li>
 				<li>Zipcode: <input type="text" name="zipcode" value="<?php print_val('zipcode') ?>"/></li>
 				<li>Comments: <textarea name="comments"><?php print_val('comments') ?></textarea></li>
-				<input type="hidden" value="1" name="submitCheck"/>
 				<li><input type="submit"/></li>
 			</ul>
 		</form>
 
 <?php
-// end if
-}
+	// end if
+	}
+
 ?>
 
 	</div>
