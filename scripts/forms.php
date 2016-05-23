@@ -10,12 +10,10 @@
  * @return void
  */
 function print_val($fieldName){
-	$fieldValue = "";
-	if(isset($_POST[$fieldName])){
-		$fieldValue = filter_input(INPUT_POST, $fieldName, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-	}
+	$fieldValue = filter_input(INPUT_POST, $fieldName, FILTER_SANITIZE_STRING);
 	print $fieldValue;
 }
+
 /**
  * validate_comment()
  *
@@ -116,9 +114,9 @@ if(
 			if($field == 'submitCheck'){
 				print "name: $name";
 			} elseif($field == 'firstName' || $field == 'lastName') {
-				$name .= "$value ";
+				$name .= strip_tags($value)." ";
 			} else {
-				print "$field: $value <br />";
+				print "$field: ".strip_tags($value)." <br />";
 			}
 		}
 	} elseif(isset($_POST['submitCheck'])) {
