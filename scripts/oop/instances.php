@@ -6,7 +6,12 @@ $recipe1 = new Recipe("a first example");
 
 $recipe2 = new Recipe("a simple example");
 
-print $recipe2->displayRecipe();
+$objects = array();
 
-print $recipe2;
+$objects[] = new Recipe("recipe one");
+$objects[] = new Recipe("recipe two");
+
+foreach($objects as $object){
+	print $object->getTitle() . "\n";
+}
 ?>
