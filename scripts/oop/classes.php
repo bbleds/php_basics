@@ -10,10 +10,18 @@ class Recipe
 	public $yield;
 	public $tag = array();
 	public $source = 'treehouse';
+
+	public function displayRecipe()
+	{
+		return $this->title . " by " . $this->source;
+	}
 }
 
 $recipe1 = new Recipe();
-print $recipe1->source;
 
-print_r($recipe1);
+$recipe2 = new Recipe();
+
+$recipe2->title = "An example";
+
+print $recipe2->displayRecipe();
 ?>
