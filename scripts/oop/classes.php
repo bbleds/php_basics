@@ -34,6 +34,18 @@ class Recipe
 	{
 		return $this->title;
 	}
+	
+	public function __construct($title="")
+	{
+		$this->setTitle($title);
+	}
+	
+	public function __toString()
+	{
+		print "\nThe methods are: ";
+		print_r(get_class_methods(__CLASS__));
+		return "\nYou are calling the class: " . __CLASS__ . ". It is stored in " . basename(__FILE__) . " at " . __DIR__;	
+	}
 }
 
 ?>
