@@ -1,5 +1,6 @@
 <?php
 require_once "../ini.php";
+require_once "../advanced_arrays/advanced_arrays.php";
 
 /**
  * @author Ben Bledsoe
@@ -129,8 +130,36 @@ class Person
 		foreach($address_array as $key => $value){
 			$this->address[$key] = $value;
 		}
-	 }
+	 }	 
 }
 
-$example = new Person();
+//Clear screen of prints from required advanced_arrays.php
+ob_clean();
+
+//Goal One 
+$bob = new Person();
+
+$bob->set_name($people[0]['first_name'], $people[0]['last_name']);
+$bob->set_email($people[0]['email']);
+$bob->set_phone($people[0]['phone']);
+$bob->set_address($people[0]['address']);
+
+$bob->get_name();
+$bob->get_email();
+$bob->get_phone();
+$bob->get_address();
+
+print "\n";
+
+$sue = new Person();
+
+$sue->set_name("Sue", "Smith");
+$sue->set_email($people[1]['email']);
+$sue->set_phone($people[1]['phone']);
+$sue->set_address($people[1]['address']);
+
+$sue->get_name();
+$sue->get_email();
+$sue->get_phone();
+$sue->get_address();
 ?>
