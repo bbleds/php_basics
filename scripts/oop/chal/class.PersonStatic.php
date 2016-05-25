@@ -21,7 +21,7 @@ class PersonStatic
 	 *
 	 * Prints the $first_name and $last_name properties
 	 *
-	 * @static
+	 * @access public
 	 *
 	 * @return void
 	 */
@@ -34,7 +34,7 @@ class PersonStatic
 	 *
 	 * Sets the $first_name and $last_name properties
 	 *
-	 * @static
+	 * @access public
 	 *
 	 * @param string $firstName
 	 * @param string $lastName
@@ -51,7 +51,7 @@ class PersonStatic
 	 *
 	 * Prints the $email property
 	 *
-	 * @static
+	 * @access public
 	 *
 	 * @return void
 	 */
@@ -64,7 +64,7 @@ class PersonStatic
 	 *
 	 * Sets the $email property
 	 *
-	 * @static
+	 * @access public
 	 * 
 	 * @param string $email
 	 *
@@ -79,7 +79,7 @@ class PersonStatic
 	 *
 	 * Prints the $phone property
 	 *
-	 * @static
+	 * @access public
 	 *
 	 * @return void
 	 */
@@ -92,7 +92,7 @@ class PersonStatic
 	 *
 	 * Sets the $phone property
 	 *
-	 * @static
+	 * @access public
 	 * 
 	 * @param string $phone
 	 *
@@ -107,7 +107,7 @@ class PersonStatic
 	 *
 	 * Prints each array value in the $address property
 	 *
-	 * @static
+	 * @access public
 	 *
 	 * @return void
 	 */
@@ -120,7 +120,7 @@ class PersonStatic
 	 *
 	 * Sets the $address property 
 	 *
-	 * @static
+	 * @access public
 	 * 
 	 * @param array $address_array
 	 *
@@ -137,24 +137,22 @@ class PersonStatic
 	 *
 	 * Calls the get_name(), get_email(), get_phone(), and get_address() methods
 	 *
-	 * @static
+	 * @access public
 	 * 
-	 *
 	 * @return void
 	 */
 	public static function get_full_name(){
-		PersonStatic::get_name();
-		PersonStatic::get_email();
-		PersonStatic::get_phone();
-		PersonStatic::get_address();
+		self::get_name();
+		self::get_email();
+		self::get_phone();
+		self::get_address();
 	}
 }
 
-PersonStatic::set_name("Ben", "Bledsoe");
+PersonStatic::set_name("John", "Doe");
 PersonStatic::set_email("example@gmail.com");
 PersonStatic::set_phone("(111) 111-1111");
 PersonStatic::set_address($people[0]['address']);
 
 PersonStatic::get_full_name();
-
 ?>
