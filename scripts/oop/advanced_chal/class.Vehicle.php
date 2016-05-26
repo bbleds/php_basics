@@ -11,7 +11,6 @@ require_once "../../ini.php";
  {
  		public $wheels;
  		public $fuel_tank;
- 		public $tank_capacity;
  		public $headlights;
  		public $dash_gauges = array(
  			"fuel_level" => 100,
@@ -27,7 +26,7 @@ require_once "../../ini.php";
 	 * @access public
 	 *
 	 * @param int $wheels
-	 * @param int $fuelTank
+	 * @param int|float $fuelTank
 	 * @param int $headlights
 	 *
 	 * @return void
@@ -35,7 +34,6 @@ require_once "../../ini.php";
 	public function __construct($wheels, $fuelTank, $headlights = 2){
 		$this->wheels = $wheels;
 		$this->fuel_tank = $fuelTank;
-		$this->tank_capacity = $fuelTank;
 		$this->headlights = $headlights;
 		print "This vehicle has:\n $wheels wheels, a tank that can hold $fuelTank gallons, and $headlights headlights!\n\nCurrent dash gauge levels:\n ";
 		$this->get_gauge_levels();
@@ -85,29 +83,49 @@ require_once "../../ini.php";
 	/**
 	 * Vehicle::accelerate()
 	 *
-	 * Displays message that vehicle is ready to drive
+	 * Accelerates vehicle, updates values in dash_gauges array
 	 *
 	 * @access public
+	 *
+	 * @param int $speed
+	 * @param int|float $fuelTaken
+	 * @param int|float $tempIncrease
 	 *
 	 * @return void
 	 */ 
 	 public function accelerate($speed = 10, $fuelTaken = 1, $tempIncrease = .5){
 	 		print "\nGo faster!\n";
-	 		if($this->fuel_tank - $fuelTaken <= 0){
+	 		if($this->dash_gauges['fuel_level'] - (($fuelTaken/$this->fuel_tank)*100) <= 0){
 	 			die("OUT OF FUEL!");
 	 		} else {
 	 			$this->dash_gauges['speed'] += $speed;
-	 			$this->fuel_tank -= $fuelTaken;
-	 			$this->dash_gauges['fuel_level'] = (($this->fuel_tank/$this->tank_capacity)*100);
-	 			$this->dash_gauges['engine_temperature'] += $tempIncrease;	
+	 			$this->dash_gauges['fuel_level'] -= (($fuelTaken/$this->fuel_tank)*100);
+	 			$this->dash_gauges['engine_temperature'] += $tempIncrease;
 	 		}
 	 }
-	 	
- 
+	 
+	/**
+	 * Vehicle::brake()
+	 *
+	 * Slows vehicle down, updates various values in dash_gauges array appropriately 
+	 *
+	 * @access public
+	 *
+	 * @return void
+	 */ 
+	 public function brake($speedDecrease = 10, $tempDecrease = .1){
+	 	print "Slow down!\n";
+	 	$this->dash_gauges['speed'] -= $speedDecrease;
+	 	$this->dash_gauges['engine_temperature'] -= $tempDecrease;
+	 }	 
+
 }
 
 $example = new Vehicle(2,20);
 $example->accelerate();
+$example->get_gauge_levels();
+
+$example->brake();
 $example->get_gauge_levels();
 
 ?>
