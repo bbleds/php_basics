@@ -38,8 +38,21 @@ require_once "../../ini.php";
 		print "This vehicle has:\n $wheels wheels, a tank that can hold $fuelTank gallons, and $headlights headlights!\n\nCurrent dash gauge levels:\n ";
 		$this->get_gauge_levels();
 		$this->drive();
-		
 	}
+	
+	/**
+	 * Vehicle::__destruct()
+	 *
+	 * Calls Vehicle::get_gauge_levels() after final reference to object 
+	 *
+	 * @access public
+	 *
+	 * @return void
+	 */ 
+	 public function __destruct(){
+	 	$this->get_gauge_levels();	
+	 }
+	 
  
 	/**
 	 * Vehicle::display_gauge_levels()
@@ -117,7 +130,20 @@ require_once "../../ini.php";
 	 	print "Slow down!\n";
 	 	$this->dash_gauges['speed'] -= $speedDecrease;
 	 	$this->dash_gauges['engine_temperature'] -= $tempDecrease;
-	 }	 
+	 }
+	 
+	/**
+	 * Vehicle::honk()
+	 *
+	 * Honks the vehicle to annoy other drivers
+	 *
+	 * @access public
+	 *
+	 * @return void
+	 */ 
+	 public function honk(){
+	 	print "HONK!\n";
+	 }
 
 }
 
@@ -127,5 +153,7 @@ $example->get_gauge_levels();
 
 $example->brake();
 $example->get_gauge_levels();
+
+$example->honk();
 
 ?>
