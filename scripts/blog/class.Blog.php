@@ -20,7 +20,7 @@ class Blog {
 	 * @return array $resp
 	 */	
 	public static function get_entries() {
-		$resp = MDB::find('blog_entries', array(), array('date_posted'=>-1));
+		$resp = /*library class*/::find('blog_entries', array(), array('date_posted'=>-1));
 
 		return $resp;
 	}
@@ -43,7 +43,7 @@ class Blog {
 		// will die if $id is invalid
 		$id = self::validate_mongo_id($id, $error_message);
 		
-		$resp = MDB::findById('blog_entries',$id);
+		$resp = /*library class*/::findById('blog_entries',$id);
 		
 		if($resp['error']){
 			die($error_message);
@@ -65,7 +65,7 @@ class Blog {
 	 * @return array $resp
 	 */	
 	public static function post_entry($postData){
-		 $resp = MDB::insert('blog_entries', $postData);
+		 $resp = /*library class*/::insert('blog_entries', $postData);
 		 
 		 return $resp;
 	}
@@ -90,7 +90,7 @@ class Blog {
 		$id = self::validate_mongo_id($id, $error_message);
 	
 		// insert new comment array
-		$resp = MDB::findAndModify('blog_entries', array('_id'=>$id), array('$push'=>array("comments" => $commentDetails)));
+		$resp = /*library class*/::findAndModify('blog_entries', array('_id'=>$id), array('$push'=>array("comments" => $commentDetails)));
 		
 		return $resp;
 	}
@@ -113,7 +113,7 @@ class Blog {
 		// will die if $id is invalid
 		$id = self::validate_mongo_id($id, $error_message);
 		
-		$resp = MDB::find('blog_entries', array('_id'=>$id), array('date_posted', 1));
+		$resp = /*library class*/::find('blog_entries', array('_id'=>$id), array('date_posted', 1));
 		$comments = $resp['data']['rows'][0]['comments'];
 		
 		return $comments;	
@@ -146,7 +146,7 @@ class Blog {
 	 * @return int $total
 	 */
 	public static function get_total_blog_entries(){
-		$resp = MDB::count('blog_entries');
+		$resp = /*library class*/::count('blog_entries');
 		
 		$total = $resp['data']['count'];
 		
