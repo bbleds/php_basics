@@ -1,5 +1,6 @@
 <?php 
 $root = realpath($_SERVER['DOCUMENT_ROOT']);
+// require library class
 
 /**
  * @author Ben Bledsoe
@@ -39,17 +40,8 @@ class Blog {
 		
 		$error_message = 'There was an error retrieving this page, invalid ID received, please try again later! <br/><a href="index.php">Go Back!</a>';
 		
-		if( empty($id) ){
-			die($error_message);
-		}
-		
-		if( !is_object($id) ){
-			try {
-				$id = new MongoId($id);		
-			}	catch (MongoException $e) {
-				die( $error_message);
-			}
-		}
+		// will die if $id is invalid
+		$id = self::validate_mongo_id($id, $error_message);
 		
 		$resp = MDB::findById('blog_entries',$id);
 		
@@ -94,18 +86,8 @@ class Blog {
 		
 		$error_message = 'There was an error processing your comment, please try again later! <br/><a href="../index.php">Go Back!</a>';
 		
-		if( empty($id) ){
-			$error_message = 'There was an error processing your comment, Invalid ID received, please try again later! <br/><a href="../index.php">Go Back!</a>';
-			die($error_message);
-		}
-		
-		if( !is_object($id) ){
-			try {
-				$id = new MongoId($id);		
-			}	catch (MongoException $e) {
-				die( $error_message);
-			}
-		}
+		// will die if $id is invalid 
+		$id = self::validate_mongo_id($id, $error_message);
 	
 		// insert new comment array
 		$resp = MDB::findAndModify('blog_entries', array('_id'=>$id), array('$push'=>array("comments" => $commentDetails)));
@@ -128,18 +110,8 @@ class Blog {
 		
 		$error_message = 'There was an error processing your comment, please try again later! <br/><a href="index.php">Go Back!</a>';
 		
-		if( empty($id) ){
-			$error_message = 'There was an error processing your comment, Invalid ID received, please try again later! <br/><a href="../index.php">Go Back!</a>';
-			die($error_message);
-		}
-		
-		if( !is_object($id) ){
-			try {
-				$id = new MongoId($id);		
-			}	catch (MongoException $e) {
-				die($error_message);
-			}
-		}
+		// will die if $id is invalid
+		$id = self::validate_mongo_id($id, $error_message);
 		
 		$resp = MDB::find('blog_entries', array('_id'=>$id), array('date_posted', 1));
 		$comments = $resp['data']['rows'][0]['comments'];
@@ -195,10 +167,6 @@ class Blog {
 	public static function count_blog_entry_comments($id){
 		$error_message = 'No ID given, please try again! <br/><a href="index.php">Go Back!</a>';
 		
-		if( empty($id) ){
-			die($error_message);
-		}
-		
 		// will die if invalid id
 		$comments = self::get_comments($id);
 		
@@ -206,7 +174,37 @@ class Blog {
 		
 		return $total;
 	}
+	
+	/**
+	 * Blog::validate_mongo_id()
+	 *
+	 * Validate that an id exists and is a valid MongoId object
+	 *
+	 * @access private
+	 * 
+	 * @param string|object $id
+	 * @param string $errorMessage
+	 *
+	 * @return object $id
+	 */
+	public static function validate_mongo_id($id, $errorMessage){
+		if( empty($id) ){
+			die($errorMessage);
+		}
+		
+		if( !is_object($id) ){
+			try {
+				$id = new MongoId($id);		
+			}	catch (MongoException $e) {
+				die($errorMessage);
+			}
+		}
+		
+		return $id;
+	}
 		
 }
 
+// connect to db
 ?>
+
