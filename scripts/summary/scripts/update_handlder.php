@@ -24,33 +24,13 @@ foreach($_POST as $k=>$v){
 	$_SESSION['post_data'][$k] = $v;	
 }
 
-// validate that $requiredStringFields exist in $_POST
-foreach($requiredStringFields as $field){	
-	// be sure field is not empty and isset
-	if(empty($_POST[$field]) || !isset($_POST[$field])){
-		$valid = false;	
-		array_push($errorMsg, 'Please enter all required fields!');
-		break;
-	}
-}
+$validFields = $staff->validatePostFields($_POST);
 
-// validate that fields within $requiredArrayFields exist in $_POST
-foreach($requiredArrayFields as $k=>$fields){
-
-	foreach($fields as $field){
-		// make sure each item exists within required fields that are arrays
-		if(empty($_POST[$k][$field]) || !isset($_POST[$k][$field]) ){	
-				$valid = false;
-				array_push($errorMsg, 'Please enter all required fields!');
-				break;
-		}
-	}
-}
-
-// validate email
-if(!validate_email($_POST['email'])){
+if(!$validFields['valid']){
 	$valid = false;
-	array_push($errorMsg, 'Please enter a valid email address!');
+	foreach($validFields['error'] as $error){
+		array_push($errorMsg, $error);
+	}
 }
 
 // trim and escape all input
