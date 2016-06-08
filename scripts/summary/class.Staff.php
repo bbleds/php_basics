@@ -4,6 +4,7 @@ define('SITES_PATH', realpath($_SERVER['DOCUMENT_ROOT']));
 
 require_once SITES_PATH.'/oop/class.Person.php';
 require_once SITES_PATH.'/tt4lib/src/class.MDB.php';
+require_once SITES_PATH.'/tt4lib/src/class.Util.php';
 
 /**
  * @author Ben Bledsoe
@@ -46,15 +47,24 @@ class Staff extends Person
 		}	else {
 			// store all sites user has entered
 			$enteredSites = array(); 
-	
+
 			foreach($sites as $site){
 				
-				for($i = 0; $i < count($data['social']); $i++){
-					if($data['social'][$i]['name'] == $site){
-						print '<label>' .ucwords($site) .'</label>';
-						print '<input type="url" class="form-control" name="social['. $site  .']" value="'.$data['social'][$i]['link'] .'"/>';
-						$enteredSites[] =  $data['social'][$i]['name'];
-						break;
+				// if $site is on session, print an input populated with the site on session
+				if(isset($_SESSION['post_data']['social'][$site]) && !empty($_SESSION['post_data']['social'][$site])){
+							print '<label>' . ucwords($site) .'</label>';
+							print '<input type="url" class="form-control" name="social['. $site .']" value="'.$_SESSION['post_data']['social'][$site].'" />';
+							$enteredSites[] = $site;
+				} else {
+				
+					// if the site exists in the db, print an input populated with site link from db
+					for($i = 0; $i < count($data['social']); $i++){
+				 		if($data['social'][$i]['name'] == $site){
+							print '<label>' .ucwords($site) .'</label>';
+							print '<input type="url" class="form-control" name="social['. $site  .']" value="'.$data['social'][$i]['link'] .'"/>';
+							$enteredSites[] =  $data['social'][$i]['name'];
+							break;
+						}
 					}
 				}				
 			}
@@ -102,15 +112,19 @@ class Staff extends Person
 	 		}
 	 		
 	 	} else {
+
+			// if status exists on session, use that, else use the data from post
+			$currentStatus = isset($_SESSION['post_data']['status']) ? $_SESSION['post_data']['status'] : $data['status'];			
+			
 		
-			$existingStatus = array($data['status']);
+			$existingStatus = array($currentStatus);
 		
 			// print current status
-			print '<li><label><input type="radio" name="status" value="' . $data['status'] . '" checked />'. ucwords($data['status']) .'</label><li>';
+			print '<li><label><input type="radio" name="status" value="' . $currentStatus . '" checked />'. ucwords($currentStatus) .'</label></li>';
 		
 			$diffItems = array_diff($statuses, $existingStatus); 
 			foreach($diffItems as $diff){
-				print '<li><label><input type="radio" name="status" value="' . $diff . '"/>'. ucwords($diff) .'</label><li>';
+				print '<li><label><input type="radio" name="status" value="' . $diff . '"/>'. ucwords($diff) .'</label></li>';
 			}
 		}
 		
@@ -211,6 +225,10 @@ class Staff extends Person
 		// key names in $_POST that should be pushed into $newRecord immediately
 		$immediateKeysToPush = array('email', 'phone', 'position', 'bio', 'status', 'contact_methods');
 		
+		// if position is not set, push a default position
+		if(!isset($newRecord['position']) || empty($newRecord['position']) ){
+			$newRecord['position'] = 'team member';
+		}
 		
 		// loop through $immediateKeysToPush and push into $newRecord array
 		foreach($immediateKeysToPush as $key){
@@ -308,6 +326,59 @@ class Staff extends Person
 		}
 	
 		return $fieldValue;
+	}
+	
+	
+	/**
+	 * Staff::validatePostFields()
+	 *
+	 * validates post data
+	 *
+	 * @access public
+	 * 
+	 * @param array $postData
+	 *
+	 * @return array $status
+	 */
+	public function validatePostFields($postData){
+		$errorMsg = array();
+		$valid = true;
+		$requiredStringFields = array('email', 'status');
+		$requiredArrayFields = array('name'=>array('first_name', 'last_name')); 
+		$util = new Util();
+		
+		// validate that $requiredStringFields exist in $_POST
+		foreach($requiredStringFields as $field){	
+			// be sure field is not empty and isset
+			if(empty($postData[$field]) || !isset($postData[$field])){
+				$valid = false;	
+				array_push($errorMsg, 'Make sure that you entered an email and selected a status!');
+				break;
+			}
+		}
+		
+		// validate that fields within $requiredArrayFields exist in $_POST
+		foreach($requiredArrayFields as $k=>$fields){
+			
+			foreach($fields as $field){
+				// make sure each item exists within required fields that are arrays
+				if(empty($postData[$k][$field]) || !isset($postData[$k][$field]) ){		
+						$valid = false;
+						array_push($errorMsg, 'Make sure that you entered a first name and last name!');
+						break;
+				}
+			}
+		}
+		
+		// validate email
+		if(!$util->validEmail($postData['email'])){
+			$valid = false;
+			array_push($errorMsg, 'Please enter a valid email address!');
+		}
+		
+		$status = array('valid'=>$valid, 'error'=>$errorMsg);
+	
+		return $status;
 	}
 
 }
