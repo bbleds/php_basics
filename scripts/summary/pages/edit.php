@@ -64,15 +64,14 @@ if(isset($_SESSION['error_msg']) && !empty($_SESSION['error_msg']) ){
 }
 
 
-die(print_r($_SESSION['post_data']));
 
-function getSubmitOrExistingField($staffData, $topField, $midField, $bottomField){
-// get session data
-$staff->getSubmittedField();
-	
-// else
-// get existing general field 
-}
+$test = $staff->getSubmittedField('post_data','name','first_name');
+
+//if($test){	
+//	print "hey";
+//}
+
+$test = $staff->getSubmittedField('post_data','name','first_name') ? $staff->getSubmittedField('post_data', 'name', 'first_name') : $staff->get_existing_general_field($staffMember, 'first_name'); 
 
 ?>
 		</div>			
@@ -81,7 +80,7 @@ $staff->getSubmittedField();
 				<h3>General</h3>
 				
 				<label for="first_name">First Name * </label>
-				<input type="text" class="form-control required" name="name[first_name]" id="first_name" value="<?php print $staff->get_existing_general_field($staffMember, 'first_name') ?>"/>
+				<input type="text" class="form-control required" name="name[first_name]" id="first_name" value="<?php print $test  ?>"/>
 
 				<label for="last_name">Last Name * </label>
 				<input type="text" class="form-control required" name="name[last_name]" id="last_name" value="<?php print $staff->get_existing_general_field($staffMember, 'last_name') ?>"/>
