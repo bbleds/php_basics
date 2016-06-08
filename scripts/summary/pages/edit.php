@@ -71,7 +71,13 @@ $test = $staff->getSubmittedField('post_data','name','first_name');
 //	print "hey";
 //}
 
-$test = $staff->getSubmittedField('post_data','name','first_name') ? $staff->getSubmittedField('post_data', 'name', 'first_name') : $staff->get_existing_general_field($staffMember, 'first_name'); 
+$firstName = $staff->getSubmittedField('post_data','name','first_name') ? $staff->getSubmittedField('post_data', 'name', 'first_name') : $staff->get_existing_general_field($staffMember, 'first_name'); 
+$lastName = $staff->getSubmittedField('post_data','name','last_name') ? $staff->getSubmittedField('post_data', 'name', 'last_name') : $staff->get_existing_general_field($staffMember, 'last_name'); 
+$email = $staff->getSubmittedField('post_data','email') ? $staff->getSubmittedField('post_data', 'email') : $staff->get_existing_general_field($staffMember, 'email'); 
+$phone = $staff->getSubmittedField('post_data','phone') ? $staff->getSubmittedField('post_data', 'phone') : $staff->get_existing_general_field($staffMember, 'phone'); 
+$position = $staff->getSubmittedField('post_data','position') ? $staff->getSubmittedField('post_data', 'position') : $staff->get_existing_general_field($staffMember, 'position');
+$bio = $staff->getSubmittedField('post_data','bio') ? $staff->getSubmittedField('post_data', 'bio') : $staff->get_existing_general_field($staffMember, 'bio');
+
 
 ?>
 		</div>			
@@ -80,22 +86,22 @@ $test = $staff->getSubmittedField('post_data','name','first_name') ? $staff->get
 				<h3>General</h3>
 				
 				<label for="first_name">First Name * </label>
-				<input type="text" class="form-control required" name="name[first_name]" id="first_name" value="<?php print $test  ?>"/>
+				<input type="text" class="form-control required" name="name[first_name]" id="first_name" value="<?php print $firstName  ?>"/>
 
 				<label for="last_name">Last Name * </label>
-				<input type="text" class="form-control required" name="name[last_name]" id="last_name" value="<?php print $staff->get_existing_general_field($staffMember, 'last_name') ?>"/>
+				<input type="text" class="form-control required" name="name[last_name]" id="last_name" value="<?php print $lastName ?>"/>
 
 				<label for="email">Email * </label>
-				<input type="email" class="form-control required" name="email" id="email" value="<?php print $staff->get_existing_general_field($staffMember, 'email') ?>"/>
+				<input type="email" class="form-control required" name="email" id="email" value="<?php print $email ?>"/>
 
 				<label for="phone">Phone Number</label>
-				<input type="text" class="form-control" name="phone" id="phone" value="<?php print $staff->get_existing_general_field($staffMember, 'phone') ?>"/>
+				<input type="text" class="form-control" name="phone" id="phone" value="<?php print $phone ?>"/>
 
 				<label for="position">Position</label>
-				<input type="text" class="form-control" name="position" id="position" value="<?php print $staff->get_existing_general_field($staffMember, 'position') ?>"/>
+				<input type="text" class="form-control" name="position" id="position" value="<?php print $position ?>"/>
 				
 				<label>Bio</label>
-				<textarea class="form-control" name="bio"><?php print $staff->get_existing_general_field($staffMember, 'bio') ?></textarea>
+				<textarea class="form-control" name="bio"><?php print $bio ?></textarea>
 				
 				<h3>Status</h3>
 <?php 
