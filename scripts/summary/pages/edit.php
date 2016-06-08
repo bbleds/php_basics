@@ -67,9 +67,6 @@ if(isset($_SESSION['error_msg']) && !empty($_SESSION['error_msg']) ){
 
 $test = $staff->getSubmittedField('post_data','name','first_name');
 
-//if($test){	
-//	print "hey";
-//}
 
 $firstName = $staff->getSubmittedField('post_data','name','first_name') ? $staff->getSubmittedField('post_data', 'name', 'first_name') : $staff->get_existing_general_field($staffMember, 'first_name'); 
 $lastName = $staff->getSubmittedField('post_data','name','last_name') ? $staff->getSubmittedField('post_data', 'name', 'last_name') : $staff->get_existing_general_field($staffMember, 'last_name'); 
@@ -105,6 +102,8 @@ $bio = $staff->getSubmittedField('post_data','bio') ? $staff->getSubmittedField(
 				
 				<h3>Status</h3>
 <?php 
+
+
 $staff->output_staff_statuses($staff->statuses,true, $staffMember);				
 ?>				
 
@@ -132,11 +131,34 @@ if(!isset($staffMember['social'])){
 				<h3>Address</h3>
 <?php 
 
-$street = isset($staffMember['address']['street']) ? $staffMember['address']['street'] : '';
-$city = isset($staffMember['address']['city']) ? $staffMember['address']['city'] : '';
-$state = isset($staffMember['address']['state']) ? $staffMember['address']['state'] : '';
-$zip = isset($staffMember['address']['zip']) ? $staffMember['address']['zip'] : '';
+$street = '';
+$city = '';
+$state = '';
+$zip = '';
 
+if(isset($_SESSION['post_data']['address']['street'])){
+	$street = $_SESSION['post_data']['address']['street'];
+} elseif(isset($staffMember['address']['street'])) {
+	$street = $staffMember['address']['street'];
+}
+
+if(isset($_SESSION['post_data']['address']['city'])){
+	$city = $_SESSION['post_data']['address']['city'];
+} elseif(isset($staffMember['address']['city'])) {
+	$city = $staffMember['address']['city'];
+}
+
+if(isset($_SESSION['post_data']['state'])){
+	$state = $_SESSION['post_data']['state'];
+} elseif(isset($staffMember['address']['state'])) {
+	$state = $staffMember['address']['state'];
+}
+
+if(isset($_SESSION['post_data']['address']['zip'])){
+	$zip = $_SESSION['post_data']['address']['zip'];
+} elseif(isset($staffMember['address']['zip'])) {
+	$zip = $staffMember['address']['zip'];
+}
 ?>				
 				<label >Street</label>
 				<input type="text" class="form-control" name="address[street]" value="<?php print $street ?>"/>
@@ -150,10 +172,38 @@ $zip = isset($staffMember['address']['zip']) ? $staffMember['address']['zip'] : 
  
 $states = Util::getStateListData();
 
-foreach($states as $state){
-	print  "<option value='$state'> $state </option>";	
+// if state exists on session, print that state as the selected option
+if(isset($_SESSION['post_data']['state'])){
+		print  "<option value='".$_SESSION['post_data']['state']."'>".$_SESSION['post_data']['state']."</option>";	
+		
+		// for each state that is not on session, print the state
+		foreach($states as $state){
+			if($state != $_SESSION['post_data']['state']){
+				print  "<option value='$state'> $state </option>";	
+			}
+		}
+	
+// if state exists in db, print that state as selected option
+} elseif(isset($staffMember['address']['state'])){
+	
+	print  "<option value='".$staffMember['address']['state']."'>".$staffMember['address']['state']."</option>";	
+		
+		// for each state that is not in db, print the state
+	foreach($states as $state){
+		if($state != $staffMember['address']['state']){
+			print  "<option value='$state'> $state </option>";	
+		}
+	}
+	
+} else {
+	
+	foreach($states as $state){
+		if($state != $staffMember['address']['state']){
+			print  "<option value='$state'> $state </option>";	
+		}
+	}
 }
-				
+			
 ?>
 			</select>
 
@@ -162,7 +212,8 @@ foreach($states as $state){
 				<input type="hidden" name="id" value="<?php print $_GET['id'] ?>" />
 				
 				<button type="submit" class="btn btn-primary">Update Member</button>
-			</form>
+			</form>		
+
 		</div>
 	</div>
 
