@@ -34,7 +34,7 @@ class Staff extends Person
 	 *
 	 * @return void
 	 */
-	 public function output_social_fields($sites, $recordExists, $data=array()){
+	public function output_social_fields($sites, $recordExists, $data=array()){
 		
 		if(!$recordExists){
 			
@@ -91,7 +91,7 @@ class Staff extends Person
 	 *
 	 * @return void
 	 */
-	 public function output_staff_statuses($statuses, $recordExists, $data=array()){
+	public function output_staff_statuses($statuses, $recordExists, $data=array()){
 	 	
 	 	print "<ul>";
 	 	
@@ -144,7 +144,7 @@ class Staff extends Person
 	 *
 	 * @return void
 	 */
-	 public function output_contact_methods($contact_methods, $recordExists, $data=array()){
+	public function output_contact_methods($contact_methods, $recordExists, $data=array()){
 	
 		print '<ul>';
 
@@ -163,21 +163,40 @@ class Staff extends Person
 						}
 					}
 				}
-				
 				print  '/>'. ucwords($method) .'</label></li>';
 			}
+			
 		} else {
-	
-			// print each selected item
+			
+			$selectedMethods = array();
+			
+			// if a contact method exists on session 	
+			if(isset($_SESSION['post_data']['contact_methods']) && !empty($_SESSION['post_data']['contact_methods'])){
+				// print each selected item
+			 	foreach($_SESSION['post_data']['contact_methods'] as $method){
+			 		if(!empty($method)){
+			 			print '<li><label><input type="checkbox" name="contact_methods[]" value="' . $method . '" checked />'. ucwords($method) .'</label></li>';
+			 			$selectedMethods[] = $method;
+			 		}
+			 	}		 	
+			}
+		
 		 	foreach($data['contact_methods'] as $method){
-		 		print '<li><label><input type="checkbox" name="contact_methods[]" value="' . $method . '" checked />'. ucwords($method) .'</label></li>';
+
+				// if contact method is in db but not on session
+		 		if( !isset($_SESSION['post_data']['contact_methods']) && !in_array($method, $selectedMethods)){
+		 			// print each selected item
+			 		print '<li><label><input type="checkbox" name="contact_methods[]" value="' . $method . '" checked />'. ucwords($method) .'</label></li>';
+			 		$selectedMethods[] = $method;
+		 		}
 		 	}
 		 	
 		 	// print each unselected item
-		 	$diffItems = array_diff($contact_methods, $data['contact_methods']);
+		 	$diffItems = array_diff($contact_methods, $selectedMethods);
 		 	foreach($diffItems as $diff){
 		 		print '<li><label><input type="checkbox" name="contact_methods[]" value="' . $diff . '" />'. ucwords($diff) .'</label></li>';
 		 	}
+			
 		}
 		
 		print '</ul>';
@@ -195,7 +214,7 @@ class Staff extends Person
 	 *
 	 * @return string $value
 	 */
-	 public function get_existing_general_field($data, $fieldName){
+	public function get_existing_general_field($data, $fieldName){
 		
 		if( !isset($data[$fieldName]) || empty($data[$fieldName]) ){
 			$value = '';
@@ -217,7 +236,7 @@ class Staff extends Person
 	 *
 	 * @return array $newRecord
 	 */
-	 public function build_staff_record_array($data){
+	public function build_staff_record_array($data){
 		// build new record to be inserted into db
 		$newRecord = array();
 		$newRecord['date_posted'] = new MongoDate();
@@ -260,10 +279,6 @@ class Staff extends Person
 		}
 		
 		return $newRecord;
-	}
-
-	public function validate_required_string_fields(){
-		//place code here to run	
 	}
 	
 	/**
