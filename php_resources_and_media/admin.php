@@ -1,7 +1,8 @@
 <?php 
 require_once '../templates/navbar.php';
+require_once '../../tt4lib/src/class.MDB.php';
 
-// types of media files 
+// types of resource files 
 $types = array('document', 'image', 'audio', 'video', 'link');
 $statuses = array('active', 'inactive');
 
@@ -73,7 +74,7 @@ if(isset($_POST['resource']) && !empty($_POST['resource'])){
 	// begin building newRecord for db
 	$newRecord = $_POST['resource'];
 	
-	// save file to files directory
+	// save file to files directory if submitted
 	if(isset($validFile) && $validFile){
 		//move from tmp to where we want it
 		$tmp_name = $_FILES['file']['tmp_name'];
@@ -92,17 +93,24 @@ if(isset($_POST['resource']) && !empty($_POST['resource'])){
 	
 	// finish building newRecord and save to db
 	if($valid){
-			
-	// clear empty values/ trim and escape input
-	foreach($newRecord as $key=>$value){
-		if(empty($value)){
-			unset($newRecord[$key]);
-		} elseif($key != 'embed_code'){
-			$newRecord[$key] = htmlspecialchars(trim($value));
+		// clear empty values/ trim and escape input
+		foreach($newRecord as $key=>$value){
+			if(empty($value)){
+				unset($newRecord[$key]);
+			} elseif($key != 'embed_code'){
+				$newRecord[$key] = htmlspecialchars(trim($value));
+			}
 		}
-	}
-		
-			// store record in db
+			
+		// store record in db
+		//connect to db
+		$resp = /* insert new record */
+
+		if($resp['error']==1){
+			$errorMsgs[] = 'Could not store in database, please try again!';
+		} else {
+			$success = true;
+		}
 	}
 }
 
@@ -139,6 +147,8 @@ if(isset($errorMsgs) && !empty($errorMsgs)){
 	print implode(' ', $errorMsgs);
 	print '</div>';
 }
+
+if(!isset($success)){
 ?>
 					<form method="post" action="admin.php" enctype="multipart/form-data">
 					<label>Title</label>
@@ -167,6 +177,13 @@ print getSelectOptions($types, 'type');
 					
 					<button type="submit" class="btn btn-primary">Upload</button>
 				</form>
+<?php
+} else {
+	print '<div class="alert alert-success"><p>Saved resource successfully!!</p></div>';
+	print '<a href="admin.php"><button class="btn btn-success">Add Another</button></a>';
+	print '<a href="front_end.php"><button class="btn btn-primary">View Resources</button></a>';
+}
+?>
 			</div>
 		</div>
 
