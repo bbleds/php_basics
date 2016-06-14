@@ -30,14 +30,17 @@ $valid = true;
 $errorMsgs = array();
 
 if(isset($_POST['resource']) && !empty($_POST['resource'])){
-	if($_POST['resource']['type'] == 'image' || $_POST['resource']['type'] == 'document' || $_POST['resource']['type'] == 'audio'){
-		$requiredFields[] = 'file';
-	} else {
+	if($_POST['resource']['type'] == 'video'){
+		$requiredFields[] = 'embed_code';
+	} elseif($_POST['resource']['type'] == 'link') {
 		$requiredFields[] = 'url';
+	} else {
+		$requiredFields[] = 'file';	
 	}
 	
 	// check/validate required fields
 	foreach($requiredFields as $field){
+		// if file was required, validate file name and extention
 		if($field == 'file'){
 			if(!isset($_FILES['file']['name']) || empty($_FILES['file']['name'])){
 				$errorMsgs[] = '<p>No file was uploaded!</p>';
@@ -46,12 +49,16 @@ if(isset($_POST['resource']) && !empty($_POST['resource'])){
 				$fileName = $_FILES['file']['name'];			
 				$allowedFileTypes = array('doc','docx','pdf','xls','xlsx','jpeg','jpg','png','gif','mp3');
 				$fileInfo = pathinfo($fileName);
-				// validate file type
+				// validate file type and name
 				if(!in_array($fileInfo['extension'], $allowedFileTypes)){
 					$errorMsgs[] = '<p>Invalid file, please upload a different file type!</p>';	
+					$valid = false;
+				} elseif(file_exists('../files/'.$fileName)){
+					$errorMsgs[] = '<p>Invalid file, a file already exists with that name, please try again!</p>';
+					$valid = false;
+				} else {
+					$validFile = true;
 				}
-				
-				// if file name already exists
 			}
 		} else {
 			$trimedField = trim($_POST['resource'][$field]);
@@ -62,15 +69,41 @@ if(isset($_POST['resource']) && !empty($_POST['resource'])){
 		}	
 	}
 	
-	// if valid
-		// if file was uploaded
-			// store file and referece to file
-		//build newRecord with file reference or url built in
-		//store file in db
-	if($valid){
-		print_r('Valid post!!!!');
+
+	// begin building newRecord for db
+	$newRecord = $_POST['resource'];
+	
+	// save file to files directory
+	if(isset($validFile) && $validFile){
+		//move from tmp to where we want it
+		$tmp_name = $_FILES['file']['tmp_name'];
+		$currentPath = pathinfo(getcwd());
+		$projectDir = $currentPath['dirname'];
+		$fileLocation = $projectDir.'/files/'.$fileName;
+		
+		if(move_uploaded_file($tmp_name, $fileLocation)){
+			$finalLocation = '/files/'.$fileName;
+			$newRecord['link'] = $finalLocation;
+		} else {
+			$errorMsgs[]='File could not be saved, please try again!';
+			$valid = false;	
+		}
 	}
 	
+	// finish building newRecord and save to db
+	if($valid){
+			
+	// clear empty values/ trim and escape input
+	foreach($newRecord as $key=>$value){
+		if(empty($value)){
+			unset($newRecord[$key]);
+		} elseif($key != 'embed_code'){
+			$newRecord[$key] = htmlspecialchars(trim($value));
+		}
+	}
+		
+			// store record in db
+	}
 }
 
 ?>
@@ -128,6 +161,9 @@ print getSelectOptions($types, 'type');
 					
 					<label>Resource Link</label>
 					<input class='form-control' name='resource[url]' type='url' value="<?php print isset($_POST['resource']['url']) ? $_POST['resource']['url'] : '' ?>" />
+					
+					<label>Video Embed Code</label>
+					<input class='form-control' name='resource[embed_code]' type='text' value="<?php print isset($_POST['resource']['embed_code']) ? $_POST['resource']['embed_code'] : '' ?>" />
 					
 					<button type="submit" class="btn btn-primary">Upload</button>
 				</form>
