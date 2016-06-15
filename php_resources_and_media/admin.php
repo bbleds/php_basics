@@ -1,48 +1,52 @@
 <?php 
 require_once '../templates/navbar.php';
 require_once '../../tt4lib/src/class.MDB.php';
+require_once '../scripts/php/scripts.php';
+// connect
 
-// types of resource files 
 $types = array('document', 'image', 'audio', 'video', 'link');
 $statuses = array('active', 'inactive');
+$requiredFields = array('title','desc','status','type');
+$errorMsgs = array();
+$data = array();
+$id = (isset($_POST['editId']) && !empty($_POST['editId'])) ? $_POST['editId']: '';
+$valid = true;
+$dataCollection = $_POST;
+$editMode = false;
 
-// prints option elements for each item in an array
-//$colection = array
-//$fieldName = fieldname on $_POST[resource]
-function getSelectOptions($collection, $fieldName){
-	$html = '';
-	$html .= '<select class="form-control" name="resource['.$fieldName.']" type="text"><option value="">Select One</option>';
-	foreach($collection as $option){
-		$selected = '';
-			if(isset($_POST['resource'][$fieldName]) && !empty($_POST['resource'][$fieldName])){
-				if($_POST['resource'][$fieldName] == $option){
-					$selected = 'selected';
-				}
-			}
-		$html .= '<option value="'.$option.'" '.$selected.'>'.ucwords($option).'</option>';
+
+// Set $id if 'id' query string exists in url
+if(isset($_GET['id']) && !empty($_GET['id'])){
+	try {
+		$id = new MongoId($_GET['id']);
+		$editMode = true;
+		$resp = MDB::find('resource_management', array('_id'=>$id));
+		$data = $resp['data']['rows'][0];
+	}	catch (MongoException $e) {
+		die('<p>There was an error! Invalid Id, please try again!</p><a href="admin.php"><button> Try Again</button></a>');
 	}
-	$html .= '</select>';
-	return $html;
 }
 
-
-$requiredFields = array('title','desc','status','type');
-$valid = true;
-$errorMsgs = array();
-
-if(isset($_POST['resource']) && !empty($_POST['resource'])){
-	if($_POST['resource']['type'] == 'video'){
-		$requiredFields[] = 'embed_code';
-	} elseif($_POST['resource']['type'] == 'link') {
-		$requiredFields[] = 'url';
-	} else {
-		$requiredFields[] = 'file';	
+// If form was posted, validate and store
+if(isset($dataCollection['resource']) && !empty($dataCollection['resource'])){
+	
+	// set final required field based on type of resource
+	switch($dataCollection['resource']['type']){
+		case 'video':
+			$requiredFields[] = 'embed_code';
+			break;
+		case 'link':
+			$requiredFields[] = 'url';
+			break;
+		default:
+			$requiredFields[] = 'file';	
 	}
 	
 	// check/validate required fields
 	foreach($requiredFields as $field){
-		// if file was required, validate file name and extention
+		
 		if($field == 'file'){
+			// check if file name was specified
 			if(!isset($_FILES['file']['name']) || empty($_FILES['file']['name'])){
 				$errorMsgs[] = '<p>No file was uploaded!</p>';
 				$valid = false;
@@ -50,10 +54,11 @@ if(isset($_POST['resource']) && !empty($_POST['resource'])){
 				$fileName = $_FILES['file']['name'];			
 				$allowedFileTypes = array('doc','docx','pdf','xls','xlsx','jpeg','jpg','png','gif','mp3');
 				$fileInfo = pathinfo($fileName);
-				// validate file type and name
+				// validate file type 
 				if(!in_array($fileInfo['extension'], $allowedFileTypes)){
 					$errorMsgs[] = '<p>Invalid file, please upload a different file type!</p>';	
 					$valid = false;
+				// validate file name - check if file name already exists in 'files' directory 
 				} elseif(file_exists('../files/'.$fileName)){
 					$errorMsgs[] = '<p>Invalid file, a file already exists with that name, please try again!</p>';
 					$valid = false;
@@ -62,26 +67,26 @@ if(isset($_POST['resource']) && !empty($_POST['resource'])){
 				}
 			}
 		} else {
-			$trimedField = trim($_POST['resource'][$field]);
+			// be sure required field is not empty
+			$trimedField = trim($dataCollection['resource'][$field]);
 			if(empty($trimedField)){
 				$errorMsgs[] =  "<p>Please enter $field!</p>";
 				$valid = false;
 			}
 		}	
 	}
-	
 
 	// begin building newRecord for db
-	$newRecord = $_POST['resource'];
+	$newRecord = $dataCollection['resource'];
 	
-	// save file to files directory if submitted
-	if(isset($validFile) && $validFile){
-		//move from tmp to where we want it
+	// if a file was submitted and valid and if fields are valid, save file to 'files' directory 
+	if(isset($validFile) && $validFile && $valid){
 		$tmp_name = $_FILES['file']['tmp_name'];
 		$currentPath = pathinfo(getcwd());
 		$projectDir = $currentPath['dirname'];
 		$fileLocation = $projectDir.'/files/'.$fileName;
 		
+		//move from tmp to where we want it
 		if(move_uploaded_file($tmp_name, $fileLocation)){
 			$finalLocation = '/files/'.$fileName;
 			$newRecord['link'] = $finalLocation;
@@ -102,10 +107,16 @@ if(isset($_POST['resource']) && !empty($_POST['resource'])){
 			}
 		}
 			
-		// store record in db
-		//connect to db
-		$resp = /* insert new record */
-
+		// update record if in edit mode
+		if(isset($id) && !empty($id)){
+			$id = new MongoId($id);
+			// update
+		// insert record into db if not in edit mode
+		} else {
+			// insert
+		}
+	
+		// handle error
 		if($resp['error']==1){
 			$errorMsgs[] = 'Could not store in database, please try again!';
 		} else {
@@ -143,19 +154,19 @@ print $navbar;
 					<hr>
 <?php 
 if(isset($errorMsgs) && !empty($errorMsgs)){
-	print '<div class="alert alert-danger">';
-	print implode(' ', $errorMsgs);
-	print '</div>';
+	print '<div class="alert alert-danger">'.
+	implode(' ', $errorMsgs).
+	'</div>';
 }
 
 if(!isset($success)){
 ?>
 					<form method="post" action="admin.php" enctype="multipart/form-data">
 					<label>Title</label>
-					<input class='form-control' name='resource[title]' type='text' value="<?php print isset($_POST['resource']['title']) ? $_POST['resource']['title'] : '' ?>"/>
+					<input class='form-control' name='resource[title]' type='text' value="<?php print getFieldData('title',$data) ?>"/>
 					
 					<label>Description</label>
-					<input class='form-control' name='resource[desc]' type='text' value="<?php print isset($_POST['resource']['desc']) ? $_POST['resource']['desc'] : '' ?>"/>
+					<input class='form-control' name='resource[desc]' type='text' value="<?php print getFieldData('desc',$data) ?>"/>
 					
 					<label>Status</label>
 <?php 
@@ -164,24 +175,32 @@ print getSelectOptions($statuses, 'status');
 					<label>Type</label>
 <?php 
 print getSelectOptions($types, 'type');
-?>
-					
-					<label>Upload File</label>
+
+print '<label>Upload File</label>';
+if(isset($data['type']) && $data['type'] == 'document'){
+	print '<p>A file has been uploaded for this resource</p><br />';
+} else {
+?>	
 					<input class='form-control' name='file' type='file' accept=".doc,.docx,.pdf,.jpg,.jpeg,.png,.gif,.mp3" />
-					
+<?php
+}
+?>				
 					<label>Resource Link</label>
-					<input class='form-control' name='resource[url]' type='url' value="<?php print isset($_POST['resource']['url']) ? $_POST['resource']['url'] : '' ?>" />
+					<input class='form-control' name='resource[url]' type='url' value="<?php print getFieldData('url', $data) ?>" />
 					
 					<label>Video Embed Code</label>
-					<input class='form-control' name='resource[embed_code]' type='text' value="<?php print isset($_POST['resource']['embed_code']) ? $_POST['resource']['embed_code'] : '' ?>" />
+					<input class='form-control' name='resource[embed_code]' type='text' value="<?php print getFieldData('embed_code', $data) ?>" />
+					
+					<input class='form-control' name='editId' type='hidden' value="<?php print $id ?>" />
 					
 					<button type="submit" class="btn btn-primary">Upload</button>
 				</form>
 <?php
 } else {
-	print '<div class="alert alert-success"><p>Saved resource successfully!!</p></div>';
-	print '<a href="admin.php"><button class="btn btn-success">Add Another</button></a>';
-	print '<a href="front_end.php"><button class="btn btn-primary">View Resources</button></a>';
+	print '<div class="alert alert-success"><p>Saved resource successfully!!</p></div>'.
+					'<a href="admin.php"><button class="btn btn-success">Add Another</button></a>'.
+					'<a href="front_end.php"><button class="btn btn-primary">View Resources</button></a>'.
+				'</div>';
 }
 ?>
 			</div>
